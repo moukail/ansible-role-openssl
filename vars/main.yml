@@ -1,0 +1,3 @@
+---
+tarball_url: "https://github.com/openssl/openssl/releases/download/openssl-{{ openssl_ver }}/openssl-{{ openssl_ver }}.tar.gz"
+install_dir: "/tmp/openssl-{{ openssl_ver }}"
