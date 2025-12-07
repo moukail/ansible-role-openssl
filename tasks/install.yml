@@ -1,7 +1,7 @@
 ---
-- name: Set zlib package for Redhat
+- name: Set zlib package
   ansible.builtin.set_fact:
-    zlib_pkg: "{{ (ansible_facts['os_family'] == 'RedHat') | ternary('zlib-devel', 'zlib1g-dev') }}"
+    zlib_pkg: "{{ (ansible_facts['os_family'] lower == 'redhat') | ternary('zlib-devel', 'zlib1g-dev') }}"
 
 - name: Installing dependencies
   ansible.builtin.package:
@@ -12,20 +12,30 @@
     update_cache: true
     state: present
 
+- name: Create temporary build directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: build
+  register: tmp_dir
+
 - name: Downloading OpenSSL sources
   ansible.builtin.get_url:
     url: "{{ tarball_url }}"
-    dest: "/tmp/openssl-{{ openssl_ver }}.tar.gz"
-    mode: '0644'
+    dest: "{{ tmp_dir.path }}/openssl-{{ openssl_ver }}.tar.gz"
     owner: root
     group: root
+    mode: '0644'
   register: openssl_source
 
 - name: Unpacking OpenSSL
   ansible.builtin.unarchive:
     copy: false
-    dest: /tmp/
+    dest: "{{ tmp_dir.path }}"
     src: "{{ openssl_source.dest }}"
+
+- name: Set install_dir
+  ansible.builtin.set_fact:
+    install_dir: "{{ tmp_dir.path }}/openssl-{{ openssl_ver }}"
 
 - name: Configuring OpenSSL
   ansible.builtin.command: ./Configure --prefix=/usr --openssldir=/etc/ssl shared zlib enable-md2
@@ -52,3 +62,8 @@
     group: root
     mode: '0644'
     create: true
+
+- name: Delete temporary directory
+  ansible.builtin.file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
