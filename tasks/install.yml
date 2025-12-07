@@ -1,7 +1,7 @@
 ---
 - name: Set zlib package
   ansible.builtin.set_fact:
-    zlib_pkg: "{{ (ansible_facts['os_family'] lower == 'redhat') | ternary('zlib-devel', 'zlib1g-dev') }}"
+    zlib_pkg: "{{ (ansible_facts['os_family'] | lower == 'redhat') | ternary('zlib-devel', 'zlib1g-dev') }}"
 
 - name: Installing dependencies
   ansible.builtin.package:
