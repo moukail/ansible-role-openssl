@@ -1,4 +1,9 @@
-### Ansible Role for OpenSSL
+Ansible Role for OpenSSL
+=========
+
+Example Playbook
+----------------
+
 ```yaml
 ---
 - name: Install OpenSSL
