@@ -63,6 +63,9 @@
     mode: '0644'
     create: true
 
+- name: ldconfig
+  ansible.builtin.command: ldconfig
+
 - name: Delete temporary directory
   ansible.builtin.file:
     path: "{{ tmp_dir.path }}"
