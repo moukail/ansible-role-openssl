@@ -1,0 +1,54 @@
+---
+- name: Set zlib package for Redhat
+  ansible.builtin.set_fact:
+    zlib_pkg: "{{ (ansible_facts['os_family'] == 'RedHat') | ternary('zlib-devel', 'zlib1g-dev') }}"
+
+- name: Installing dependencies
+  ansible.builtin.package:
+    name:
+      - gcc
+      - make
+      - "{{ zlib_pkg }}"
+    update_cache: true
+    state: present
+
+- name: Downloading OpenSSL sources
+  ansible.builtin.get_url:
+    url: "{{ tarball_url }}"
+    dest: "/tmp/openssl-{{ openssl_ver }}.tar.gz"
+    mode: '0644'
+    owner: root
+    group: root
+  register: openssl_source
+
+- name: Unpacking OpenSSL
+  ansible.builtin.unarchive:
+    copy: false
+    dest: /tmp/
+    src: "{{ openssl_source.dest }}"
+
+- name: Configuring OpenSSL
+  ansible.builtin.command: ./Configure --prefix=/usr --openssldir=/etc/ssl shared zlib enable-md2
+  args:
+    chdir: "{{ install_dir }}"
+    creates: "{{ install_dir }}/Makefile"
+
+- name: Make OpenSSL
+  ansible.builtin.shell: make -j$(nproc) > /dev/null
+  args:
+    chdir: "{{ install_dir }}"
+    creates: "{{ install_dir }}/libssl.so"
+
+- name: Install OpenSSL
+  ansible.builtin.command: make install
+  args:
+    chdir: "{{ install_dir }}"
+
+- name: Setup ldconfig
+  ansible.builtin.lineinfile:
+    path: /etc/ld.so.conf.d/openssl.conf
+    line: /usr/lib64
+    owner: root
+    group: root
+    mode: '0644'
+    create: true

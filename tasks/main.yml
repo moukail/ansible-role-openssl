@@ -5,64 +5,10 @@
   register: current_version
   changed_when: false
 
-- name: Set current OpenSSL version
-  ansible.builtin.set_fact:
-    current_version: "{{ current_version.stdout }}"
-
 - name: Check if OpenSSL is already installed
   ansible.builtin.debug:
-    msg: "Current OpenSSL version is {{ current_version }}"
-
-- name: Set zlib package for Redhat
-  ansible.builtin.set_fact:
-    zlib_pkg: "zlib-devel"
-  when: ansible_os_family == 'RedHat'
-
-- name: Set zlib package for debian
-  ansible.builtin.set_fact:
-    zlib_pkg: "zlib1g-dev"
-  when: ansible_os_family == 'Debian'
-
-- name: Installing dependencies
-  ansible.builtin.package:
-    name:
-      - gcc
-      - make
-      #- perl
-      - "{{ zlib_pkg }}"
-    update_cache: true
-    state: present
+    msg: "Current OpenSSL version is {{ current_version.stdout }}"
 
 - name: Proceed to install OpenSSL
-  when: current_version != openssl_ver
-  block:
-    - name: Downloading OpenSSL sources
-      ansible.builtin.get_url:
-        url: "{{ tarball_url }}"
-        dest: "/tmp/openssl-{{ openssl_ver }}.tar.gz"
-        mode: '0644'
-        owner: root
-        group: root
-      register: openssl_source
-
-    - name: Unpacking OpenSSL
-      ansible.builtin.unarchive:
-        copy: false
-        dest: /tmp/
-        src: "{{ openssl_source.dest }}"
-
-    - name: Configuring OpenSSL
-      ansible.builtin.command: ./Configure --prefix=/usr --openssldir=/etc/ssl shared zlib enable-md2
-      args:
-        chdir: "{{ install_dir }}"
-        creates: "{{ install_dir }}/Makefile"
-
-    - name: Install OpenSSL
-      ansible.builtin.shell: >
-        make -j$(nproc) > /dev/null &&
-        make install > /dev/null &&
-        echo "/usr/lib64" > /etc/ld.so.conf.d/openssl.conf &&
-        ldconfig
-      args:
-        chdir: "{{ install_dir }}"
-      ignore_errors: true
+  when: current_version.stdout != openssl_ver
+  ansible.builtin.include_tasks: install.yml
