@@ -8,6 +8,7 @@
     name:
       - gcc
       - make
+      - perl
       - "{{ zlib_pkg }}"
     update_cache: true
     state: present
