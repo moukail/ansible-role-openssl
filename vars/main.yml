@@ -1,2 +1,2 @@
 ---
-tarball_url: "https://github.com/openssl/openssl/releases/download/openssl-{{ openssl_ver }}/openssl-{{ openssl_ver }}.tar.gz"
+download_url: https://github.com/openssl/openssl/releases/download/openssl-{{ openssl_version }}/openssl-{{ openssl_version }}.tar.gz"

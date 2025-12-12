@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     zlib_pkg: "{{ (ansible_facts['os_family'] | lower == 'redhat') | ternary('zlib-devel', 'zlib1g-dev') }}"
 
-- name: Installing dependencies
+- name: Install dependencies
   ansible.builtin.package:
     name:
       - gcc
@@ -19,10 +19,10 @@
     suffix: build
   register: tmp_dir
 
-- name: Downloading OpenSSL sources
+- name: Download OpenSSL
   ansible.builtin.get_url:
-    url: "{{ tarball_url }}"
-    dest: "{{ tmp_dir.path }}/openssl-{{ openssl_ver }}.tar.gz"
+    url: "{{ download_url }}"
+    dest: "{{ tmp_dir.path }}/openssl-{{ openssl_version }}.tar.gz"
     owner: root
     group: root
     mode: '0644'
@@ -34,26 +34,31 @@
     dest: "{{ tmp_dir.path }}"
     src: "{{ openssl_source.dest }}"
 
-- name: Set install_dir
+- name: Set build_dir
   ansible.builtin.set_fact:
-    install_dir: "{{ tmp_dir.path }}/openssl-{{ openssl_ver }}"
+    build_dir: "{{ tmp_dir.path }}/openssl-{{ openssl_version }}"
 
-- name: Configuring OpenSSL
-  ansible.builtin.command: ./Configure --prefix=/usr --openssldir=/etc/ssl shared zlib enable-md2
+- name: Configure OpenSSL
+  ansible.builtin.command: >
+    ./Configure 
+    --prefix=/usr 
+    --libdir=/usr/lib/x86_64-linux-gnu
+    --openssldir=/etc/ssl 
+    shared zlib enable-md2
   args:
-    chdir: "{{ install_dir }}"
-    creates: "{{ install_dir }}/Makefile"
+    chdir: "{{ build_dir }}"
+    creates: "{{ build_dir }}/Makefile"
 
 - name: Make OpenSSL
   ansible.builtin.shell: make -j$(nproc) > /dev/null
   args:
-    chdir: "{{ install_dir }}"
-    creates: "{{ install_dir }}/libssl.so"
+    chdir: "{{ build_dir }}"
+    creates: "{{ build_dir }}/libssl.so"
 
 - name: Install OpenSSL
   ansible.builtin.command: make install
   args:
-    chdir: "{{ install_dir }}"
+    chdir: "{{ build_dir }}"
 
 - name: Setup ldconfig
   ansible.builtin.lineinfile:

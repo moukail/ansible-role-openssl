@@ -10,5 +10,5 @@
     msg: "Current OpenSSL version is {{ current_version.stdout }}"
 
 - name: Proceed to install OpenSSL
-  when: current_version.stdout != openssl_ver
+  when: current_version.stdout != openssl_version
   ansible.builtin.include_tasks: install.yml
