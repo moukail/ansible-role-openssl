@@ -27,6 +27,6 @@ Example Playbook
       ansible.builtin.include_role:
         name: ansible-role-openssl
       vars:
-        openssl_version: "3.6.0"
+        openssl_version: "3.5.4"
 
 ```
