@@ -19,7 +19,7 @@
     suffix: build
   register: tmp_dir
 
-- name: Download OpenSSL
+- name: Download OpenSSL {{ openssl_version }}
   ansible.builtin.get_url:
     url: "{{ download_url }}"
     dest: "{{ tmp_dir.path }}/openssl-{{ openssl_version }}.tar.gz"
