@@ -40,17 +40,17 @@
 
 - name: Configure OpenSSL
   ansible.builtin.command: >
-    ./Configure 
-    --prefix=/usr 
+    ./Configure
+    --prefix=/usr
     --libdir=/usr/lib/x86_64-linux-gnu
-    --openssldir=/etc/ssl 
+    --openssldir=/etc/ssl
     shared zlib enable-md2
   args:
     chdir: "{{ build_dir }}"
     creates: "{{ build_dir }}/Makefile"
 
 - name: Make OpenSSL
-  ansible.builtin.shell: make -j$(nproc) > /dev/null
+  ansible.builtin.shell: make -j$(nproc)
   args:
     chdir: "{{ build_dir }}"
     creates: "{{ build_dir }}/libssl.so"
