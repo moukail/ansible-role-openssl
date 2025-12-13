@@ -50,7 +50,7 @@
     creates: "{{ build_dir }}/Makefile"
 
 - name: Make OpenSSL
-  ansible.builtin.shell: make -j$(nproc)
+  ansible.builtin.command: make
   args:
     chdir: "{{ build_dir }}"
     creates: "{{ build_dir }}/libssl.so"
