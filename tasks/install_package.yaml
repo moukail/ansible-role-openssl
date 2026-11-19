@@ -1,5 +1,6 @@
 ---
 - name: Install requested RPM version
+  become: true
   ansible.builtin.dnf:
     name: "openssl-{{ openssl_version }}"
     state: present
@@ -7,6 +8,7 @@
   when: ansible_os_family == 'RedHat'
 
 - name: Install requested DEB version
+  become: true
   ansible.builtin.apt:
     name: "openssl={{ openssl_version }}"
     state: present

@@ -7,7 +7,6 @@
   block:
 
     - name: Try package manager installation
-      become: true
       ansible.builtin.include_tasks: install_package.yaml
 
     - name: Verify package installation
@@ -23,7 +22,6 @@
   rescue:
 
     - name: Compile OpenSSL from source
-      become: true
       ansible.builtin.include_tasks: compile.yaml
 
 - name: Verify final OpenSSL installation

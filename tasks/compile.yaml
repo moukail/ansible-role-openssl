@@ -5,6 +5,7 @@
     libdir: "{{ (ansible_facts['os_family'] | lower == 'redhat') | ternary('/usr/lib64', '/usr/lib/x86_64-linux-gnu') }}"
 
 - name: Install dependencies
+  become: true
   ansible.builtin.package:
     name:
       - gcc
@@ -56,11 +57,13 @@
     creates: "{{ build_dir }}/libssl.so"
 
 - name: Install OpenSSL
+  become: true
   ansible.builtin.command: make install
   args:
     chdir: "{{ build_dir }}"
 
 - name: Setup ldconfig
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/ld.so.conf.d/openssl.conf
     line: "{{ libdir }}"
@@ -68,6 +71,7 @@
     create: true
 
 - name: ldconfig
+  become: true
   ansible.builtin.command: ldconfig
 
 - name: Delete temporary directory
