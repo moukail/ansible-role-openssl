@@ -24,8 +24,7 @@
   ansible.builtin.get_url:
     url: "{{ download_url }}"
     dest: "{{ tmp_dir.path }}/openssl-{{ openssl_version }}.tar.gz"
-    owner: root
-    group: root
+    #checksum: "{{ openssl_source_checksum }}"
     mode: '0644'
   register: openssl_source
 
@@ -42,16 +41,16 @@
 - name: Configure OpenSSL
   ansible.builtin.command: >
     ./Configure
-    --prefix=/usr
+    --prefix={{ openssl_install_prefix }}
     --libdir={{ libdir }}
-    --openssldir=/etc/ssl
+    --openssldir={{ openssl_config_dir }}
     shared zlib enable-md2
   args:
     chdir: "{{ build_dir }}"
     creates: "{{ build_dir }}/Makefile"
 
 - name: Make OpenSSL
-  ansible.builtin.shell: make -j$(nproc)
+  ansible.builtin.command: make -j{{ ansible_processor_vcpus }}
   args:
     chdir: "{{ build_dir }}"
     creates: "{{ build_dir }}/libssl.so"
@@ -65,8 +64,6 @@
   ansible.builtin.lineinfile:
     path: /etc/ld.so.conf.d/openssl.conf
     line: "{{ libdir }}"
-    owner: root
-    group: root
     mode: '0644'
     create: true
 

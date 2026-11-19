@@ -1,0 +1,53 @@
+---
+- name: Check system OpenSSL version
+  ansible.builtin.command:
+    cmd: openssl version
+  register: openssl_system_result
+  changed_when: false
+  failed_when: false
+
+- name: Check custom OpenSSL version
+  ansible.builtin.command:
+    cmd: "{{ openssl_install_prefix }}/bin/openssl version"
+  register: openssl_custom_result
+  changed_when: false
+  failed_when: false
+
+- name: Initialize installed OpenSSL versions
+  ansible.builtin.set_fact:
+    openssl_installed_versions: []
+
+- name: Add system OpenSSL version
+  ansible.builtin.set_fact:
+    openssl_installed_versions: >-
+      {{ openssl_installed_versions +
+         [openssl_system_result.stdout.split()[1]] }}
+  when: openssl_system_result.rc == 0
+
+- name: Add custom OpenSSL version
+  ansible.builtin.set_fact:
+    openssl_installed_versions: >-
+      {{ openssl_installed_versions +
+         [openssl_custom_result.stdout.split()[1]] }}
+  when: openssl_custom_result.rc == 0
+
+- name: Determine whether installation is required
+  ansible.builtin.set_fact:
+    openssl_install_required: >-
+      {{
+        openssl_installed_versions | length == 0
+        or
+        (
+          openssl_installed_versions
+          | reject('version', 'ge', openssl_version, version_type='loose')
+          | list
+          | length == openssl_installed_versions | length
+        )
+      }}
+
+- name: Display OpenSSL status
+  ansible.builtin.debug:
+    msg:
+      installed_versions: "{{ openssl_installed_versions }}"
+      requested_version: "{{ openssl_version }}"
+      installation_required: "{{ openssl_install_required }}"

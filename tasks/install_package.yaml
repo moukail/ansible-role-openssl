@@ -1,0 +1,15 @@
+---
+- name: Install requested RPM version
+  ansible.builtin.dnf:
+    name: "openssl-{{ openssl_version }}"
+    state: present
+    allow_downgrade: false
+  when: ansible_os_family == 'RedHat'
+
+- name: Install requested DEB version
+  ansible.builtin.apt:
+    name: "openssl={{ openssl_version }}"
+    state: present
+    update_cache: true
+    allow_downgrade: false
+  when: ansible_os_family == 'Debian'  

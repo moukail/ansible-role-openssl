@@ -1,0 +1,4 @@
+---
+openssl_version: "3.5.1"
+openssl_install_prefix: /usr
+openssl_config_dir: /etc/ssl
