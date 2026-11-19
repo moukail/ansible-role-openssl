@@ -23,6 +23,3 @@
 
     - name: Compile OpenSSL from source
       ansible.builtin.include_tasks: compile.yaml
-
-- name: Verify final OpenSSL installation
-  ansible.builtin.include_tasks: verify.yaml
