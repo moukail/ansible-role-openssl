@@ -31,19 +31,15 @@
          [openssl_custom_result.stdout.split()[1]] }}
   when: openssl_custom_result.rc == 0
 
-- name: Determine whether installation is required
+- name: Initialize installation requirement
   ansible.builtin.set_fact:
-    openssl_install_required: >-
-      {{
-        openssl_installed_versions | length == 0
-        or
-        (
-          openssl_installed_versions
-          | reject('version', 'ge', openssl_version, version_type='loose')
-          | list
-          | length == openssl_installed_versions | length
-        )
-      }}
+    openssl_install_required: true
+
+- name: Check whether any installed version meets requirement
+  ansible.builtin.set_fact:
+    openssl_install_required: false
+  when: item is version(openssl_version, '>=', version_type='loose')
+  loop: "{{ openssl_installed_versions }}"
 
 - name: Display OpenSSL status
   ansible.builtin.debug:
